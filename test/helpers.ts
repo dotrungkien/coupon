@@ -93,7 +93,7 @@ async function useCoupon(
   signature: string,
   counponCode: string
 ) {
-  return execMethod(client, signature, 'use-code', [counponCode]);
+  return execMethod(client, signature, 'use-code', [counponCode], true);
 }
 
 async function transferCoupon(

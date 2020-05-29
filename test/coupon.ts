@@ -49,7 +49,7 @@ describe('coupon contract', () => {
 
   describe('create some coupon', () => {
     before(async () => {
-      const receipt = await createCoupon(client, 'u10');
+      await createCoupon(client, 'u10');
       await createCoupon(client, 'u20');
       await createCoupon(client, 'u30');
     });
@@ -111,7 +111,16 @@ describe('coupon contract', () => {
       // });
     });
 
-    describe('use coupon', () => {});
+    describe('use coupon', () => {
+      before(async () => {
+        useCoupon(client, couponCreator, 'u3');
+      });
+
+      it('coupon u3 was used', async () => {
+        let used = await checkCouponUsed(client, 'u3');
+        expect(used).equal(true);
+      });
+    });
   });
 
   after(async () => {
