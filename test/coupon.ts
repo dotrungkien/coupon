@@ -14,6 +14,7 @@ import {
   checkCouponValid,
   checkCouponDiscount,
   ownerOf,
+  isOwner,
   checkCouponUsed,
   transferCoupon,
   useCoupon,
@@ -65,20 +66,17 @@ describe('coupon contract', () => {
     });
 
     it('coupon u1 belongs to coupon creator', async () => {
-      let receipt = await ownerOf(client, 'u1');
-      let owner = unwrapAddress(Result.unwrap(receipt));
+      let owner = await ownerOf(client, 'u1');
       expect(owner).equal(couponCreator);
     });
 
     it('coupon u2 belongs to coupon creator', async () => {
-      let receipt = await ownerOf(client, 'u2');
-      let owner = unwrapAddress(Result.unwrap(receipt));
+      let owner = await ownerOf(client, 'u2');
       expect(owner).equal(couponCreator);
     });
 
     it('coupon u3 belongs to coupon creator', async () => {
-      let receipt = await ownerOf(client, 'u3');
-      let owner = unwrapAddress(Result.unwrap(receipt));
+      let owner = await ownerOf(client, 'u3');
       expect(owner).equal(couponCreator);
     });
 
@@ -86,39 +84,49 @@ describe('coupon contract', () => {
       let used = await checkCouponUsed(client, 'u1');
       expect(used).equal(false);
     });
+
     it('coupon u1 is 10% discount', async () => {
       let discount = await checkCouponDiscount(client, 'u1');
       expect(discount).equal(10);
     });
 
-    describe('transfer coupon', () => {
-      before(async () => {
-        await transferCoupon(client, couponCreator, userA, 'u1');
-        // await transferCoupon(client, couponCreator, userB, 'u2');
-        // await transferCoupon(client, userB, userC, 'u2');
-      });
+    // describe('transfer coupon', () => {
+    //   before(async () => {
+    //     await transferCoupon(client, couponCreator, userA, 'u1');
+    //     // await transferCoupon(client, couponCreator, userB, 'u2');
+    //     // await transferCoupon(client, userB, userC, 'u2');
+    //   });
 
-      it('coupon u2 now belongs to userA', async () => {
-        let receipt = await ownerOf(client, 'u2');
-        let owner = unwrapAddress(Result.unwrap(receipt));
-        expect(owner).equal(userA);
-      });
+    //   it('coupon u2 now belongs to userA', async () => {
+    //     let receipt = await isOwner(client, userA, 'u1');
+    //     console.log({ receipt });
+    //   });
 
-      // it('coupon u3 now belongs to userC', async () => {
-      //   let receipt = await ownerOf(client, 'u3');
-      //   let owner = unwrapAddress(Result.unwrap(receipt));
-      //   expect(owner).equal(userC);
-      // });
-    });
+    //   // it('coupon u3 now belongs to userC', async () => {
+    //   //   let receipt = await ownerOf(client, 'u3');
+    //   //   let owner = unwrapAddress(Result.unwrap(receipt));
+    //   //   expect(owner).equal(userC);
+    //   // });
+    // });
 
     describe('use coupon', () => {
       before(async () => {
-        useCoupon(client, couponCreator, 'u3');
+        await useCoupon(client, couponCreator, 'u3');
+      });
+
+      it('coupon u3 belongs to coupon creator', async () => {
+        let receipt = await isOwner(client, couponCreator, 'u3');
+        expect(Result.unwrap(receipt)).equal('true');
       });
 
       it('coupon u3 was used', async () => {
         let used = await checkCouponUsed(client, 'u3');
         expect(used).equal(true);
+      });
+
+      it('cannot use coupon u3 again', async () => {
+        let receipt = await useCoupon(client, couponCreator, 'u3');
+        expect(receipt.success).equal(false);
       });
     });
   });

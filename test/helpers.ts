@@ -62,6 +62,18 @@ async function ownerOf(client: Client, couponCode: string) {
     },
   });
   const receipt = await client.submitQuery(query);
+  const owner = unwrapAddress(Result.unwrap(receipt));
+  return owner;
+}
+
+async function isOwner(client: Client, actor: string, couponCode: string) {
+  let query = client.createQuery({
+    method: {
+      name: 'is-owner',
+      args: [`'${actor}`, couponCode],
+    },
+  });
+  const receipt = await client.submitQuery(query);
   return receipt;
 }
 
@@ -80,7 +92,6 @@ async function execMethod(
   });
   await tx.sign(signature);
   const receipt = await client.submitTransaction(tx);
-  if (debug) console.log({ receipt });
   return receipt;
 }
 
@@ -93,7 +104,7 @@ async function useCoupon(
   signature: string,
   counponCode: string
 ) {
-  return execMethod(client, signature, 'use-code', [counponCode], true);
+  return execMethod(client, signature, 'use-coupon', [counponCode], true);
 }
 
 async function transferCoupon(
@@ -120,5 +131,6 @@ export {
   checkCouponUsed,
   transferCoupon,
   ownerOf,
+  isOwner,
   useCoupon,
 };

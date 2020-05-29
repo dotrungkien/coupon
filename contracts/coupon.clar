@@ -24,6 +24,13 @@
   (nft-get-owner? coupon coupon-code)
 )
 
+;; check is owner of a coupon
+(define-private (is-owner (actor principal) (coupon-code uint))
+  (is-eq actor
+    (unwrap! (nft-get-owner? coupon coupon-code) false)
+  )
+)
+
 ;; The coupon-creator create a coupon to receiver
 ;; By default, the created coupons belong to the coupon-creator
 (define-public (create-coupon (discount uint))
@@ -90,13 +97,6 @@
   )
 )
 
-(define-private (is-owner (actor principal) (coupon-code uint))
-  (is-eq actor
-    (unwrap! (nft-get-owner? coupon coupon-code) false)
-  )
-)
-
-
 ;; use coupon
 (define-public (use-coupon (coupon-code uint))
   (if (is-owner tx-sender coupon-code)
@@ -105,9 +105,10 @@
         err-code-used
           (begin
             (map-set coupons
-              {coupon-code: coupon-code}
-              {discount: (get discount code), used: true})
-            (ok (get discount code))
+              ((coupon-code coupon-code))
+              ((discount u9) (used true))
+            )
+            (ok 1)
           )
         )
       err-invalid-code
