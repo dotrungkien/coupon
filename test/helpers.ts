@@ -69,7 +69,8 @@ async function execMethod(
   client: Client,
   signature: string,
   method: string,
-  args: string[]
+  args: string[],
+  debug = false
 ): Promise<Receipt> {
   const tx = client.createTransaction({
     method: {
@@ -79,6 +80,7 @@ async function execMethod(
   });
   await tx.sign(signature);
   const receipt = await client.submitTransaction(tx);
+  if (debug) console.log({ receipt });
   return receipt;
 }
 
@@ -100,7 +102,13 @@ async function transferCoupon(
   receiver: string,
   counponCode: string
 ) {
-  return execMethod(client, signature, 'transfer', [receiver, counponCode]);
+  return execMethod(
+    client,
+    signature,
+    'transfer',
+    [`'${receiver}`, counponCode],
+    true
+  );
 }
 
 export {
